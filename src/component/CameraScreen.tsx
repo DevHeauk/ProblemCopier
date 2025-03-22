@@ -25,7 +25,6 @@ const CameraScreen: React.FC = () => {
     })();
   }, []);
 
-  console.log('DEBUG11', device, hasPermission);
   if (!device) return <Text>No camera available</Text>;
   if (!hasPermission) return <Text>No permission</Text>;
 
