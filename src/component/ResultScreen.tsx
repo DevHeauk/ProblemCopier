@@ -8,7 +8,7 @@ import {
   Dimensions,
   SafeAreaView,
 } from 'react-native';
-import RenderHtml from 'react-native-render-html';
+import RenderHtml, { CustomRendererProps } from 'react-native-render-html';
 
 interface ResultScreenProps {
   htmlContent: string;
@@ -17,6 +17,27 @@ interface ResultScreenProps {
 
 const ResultScreen: React.FC<ResultScreenProps> = ({ htmlContent, onClose }) => {
   const contentWidth = Dimensions.get('window').width - 40;
+
+
+  // span 태그를 위한 커스텀 렌더러 (태그 스타일링용)
+  const spanRenderer = ({ TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+    const { tnode } = props;
+    const text = tnode.children?.[0]?.data || '';
+    
+    // 배경색과 스타일 추출
+    const style = tnode.attributes?.style || '';
+    const isTag = style.includes('background:') && style.includes('color: white');
+    
+    if (isTag) {
+      return (
+        <View style={styles.tagContainer}>
+          <Text style={styles.tagText}>{text}</Text>
+        </View>
+      );
+    }
+    
+    return <TDefaultRenderer {...props} />;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,6 +52,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ htmlContent, onClose }) => 
         <RenderHtml
           contentWidth={contentWidth}
           source={{ html: htmlContent }}
+          renderers={{
+            span: spanRenderer,
+          }}
           tagsStyles={{
             body: {
               color: '#333',
@@ -39,26 +63,49 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ htmlContent, onClose }) => 
             h1: {
               fontSize: 24,
               marginBottom: 10,
+              color: '#2c3e50',
+              fontWeight: 'bold',
             },
             h2: {
               fontSize: 22,
               marginBottom: 8,
+              color: '#2c3e50',
+              fontWeight: 'bold',
             },
             h3: {
               fontSize: 20,
               marginBottom: 6,
+              color: '#2c3e50',
+              fontWeight: 'bold',
+            },
+            h4: {
+              fontSize: 18,
+              marginBottom: 10,
+              color: '#2c3e50',
+              fontWeight: 'bold',
             },
             p: {
               marginBottom: 10,
               lineHeight: 24,
+              fontSize: 16,
+              color: '#333',
             },
             div: {
               marginBottom: 10,
             },
             strong: {
               fontWeight: 'bold',
+              color: '#2c3e50',
             },
+            h5: {
+              fontSize: 16,
+              marginBottom: 10,
+              color: '#3498db',
+              fontWeight: 'bold',
+            }
+
           }}
+          enableExperimentalMarginCollapsing={true}
         />
       </ScrollView>
 
@@ -113,6 +160,19 @@ const styles = StyleSheet.create({
   newPhotoButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  tagContainer: {
+    backgroundColor: '#3498db',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  tagText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });
